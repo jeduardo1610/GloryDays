@@ -35,6 +35,9 @@
                                         <rect key="frame" x="121" y="119.5" width="93" height="34"/>
                                         <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="18"/>
                                         <state key="normal" title="Go Ahead!"/>
+                                        <connections>
+                                            <action selector="askForPermission:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hqb-EQ-AYR"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                             </stackView>
@@ -47,16 +50,19 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Welcome home!" id="7HL-Kg-LjI"/>
+                    <connections>
+                        <outlet property="infoLabel" destination="DPV-Ed-c7a" id="JiH-km-mwE"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1076" y="134.48275862068968"/>
         </scene>
-        <!--Collection View Controller-->
+        <!--Memories Collection View Controller-->
         <scene sceneID="ukv-9m-3ub">
             <objects>
-                <collectionViewController id="HIK-aT-e15" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="QgE-Cr-MF3">
+                <collectionViewController id="HIK-aT-e15" customClass="MemoriesCollectionViewController" customModule="GloryDays" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" id="QgE-Cr-MF3">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="1" green="0.80000001190000003" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
@@ -67,7 +73,7 @@
                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                         </collectionViewFlowLayout>
                         <cells>
-                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="yK5-W8-qvT">
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="collectionCell" id="yK5-W8-qvT" customClass="MemoryCell" customModule="GloryDays" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="50" width="170" height="170"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -85,9 +91,12 @@
                                     <constraint firstItem="B5J-I5-Mtd" firstAttribute="top" secondItem="yK5-W8-qvT" secondAttribute="top" id="hrl-5Q-bs0"/>
                                     <constraint firstItem="B5J-I5-Mtd" firstAttribute="leading" secondItem="yK5-W8-qvT" secondAttribute="leading" id="pMo-yg-axn"/>
                                 </constraints>
+                                <connections>
+                                    <outlet property="imageView" destination="B5J-I5-Mtd" id="2RT-Y1-Vel"/>
+                                </connections>
                             </collectionViewCell>
                         </cells>
-                        <collectionReusableView key="sectionHeaderView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="jox-XQ-uum">
+                        <collectionReusableView key="sectionHeaderView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="collectionHeader" id="jox-XQ-uum">
                             <rect key="frame" x="0.0" y="0.0" width="375" height="50"/>
                             <autoresizingMask key="autoresizingMask"/>
                             <subviews>
@@ -100,6 +109,9 @@
                                             <color key="value" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                         </userDefinedRuntimeAttribute>
                                     </userDefinedRuntimeAttributes>
+                                    <connections>
+                                        <outlet property="delegate" destination="HIK-aT-e15" id="CQ0-5o-3HW"/>
+                                    </connections>
                                 </searchBar>
                             </subviews>
                         </collectionReusableView>
@@ -112,12 +124,12 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wdf-Id-xio" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="988" y="1024.1379310344828"/>
+            <point key="canvasLocation" x="988" y="-835"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="jEl-61-Lwh">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="eQa-3r-sXq" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="RequestPermission" automaticallyAdjustsScrollViewInsets="NO" id="eQa-3r-sXq" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="a9w-yC-xmk">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -148,7 +160,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KAU-Gn-B7h" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="49" y="1025"/>
+            <point key="canvasLocation" x="49" y="-835"/>
         </scene>
     </scenes>
 </document>

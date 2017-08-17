@@ -12,6 +12,8 @@
 		1D1D0C941F4642EA0075261D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1D1D0C921F4642EA0075261D /* Main.storyboard */; };
 		1D1D0C961F4642EA0075261D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1D1D0C951F4642EA0075261D /* Assets.xcassets */; };
 		1D1D0C991F4642EA0075261D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1D1D0C971F4642EA0075261D /* LaunchScreen.storyboard */; };
+		1D3650061F465C810066F628 /* MemoriesCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3650051F465C810066F628 /* MemoriesCollectionViewController.swift */; };
+		1D36500B1F465DDF0066F628 /* MemoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D36500A1F465DDF0066F628 /* MemoryCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		1D1D0C951F4642EA0075261D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1D1D0C981F4642EA0075261D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1D1D0C9A1F4642EA0075261D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1D3650051F465C810066F628 /* MemoriesCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoriesCollectionViewController.swift; sourceTree = "<group>"; };
+		1D36500A1F465DDF0066F628 /* MemoryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,9 +61,11 @@
 				1D1D0C8E1F4642EA0075261D /* AppDelegate.swift */,
 				1D1D0C901F4642EA0075261D /* ViewController.swift */,
 				1D1D0C921F4642EA0075261D /* Main.storyboard */,
+				1D36500A1F465DDF0066F628 /* MemoryCell.swift */,
 				1D1D0C951F4642EA0075261D /* Assets.xcassets */,
 				1D1D0C971F4642EA0075261D /* LaunchScreen.storyboard */,
 				1D1D0C9A1F4642EA0075261D /* Info.plist */,
+				1D3650051F465C810066F628 /* MemoriesCollectionViewController.swift */,
 			);
 			path = GloryDays;
 			sourceTree = "<group>";
@@ -137,8 +143,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D36500B1F465DDF0066F628 /* MemoryCell.swift in Sources */,
 				1D1D0C911F4642EA0075261D /* ViewController.swift in Sources */,
 				1D1D0C8F1F4642EA0075261D /* AppDelegate.swift in Sources */,
+				1D3650061F465C810066F628 /* MemoriesCollectionViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,6 +312,7 @@
 				1D1D0C9F1F4642EA0075261D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
