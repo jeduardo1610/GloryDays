@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need to go into your photo library to retrieve your amazing memories into the app</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need to access to your device mic to record what you are talking about your memories</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We need to process what we record from your device mic to add to your memories </string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
