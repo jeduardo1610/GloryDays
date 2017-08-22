@@ -7,6 +7,9 @@
 //
 
 import UIKit
+import AVFoundation
+import Photos
+import Speech
 
 private let reuseIdentifier = "collectionCell"
 
@@ -22,6 +25,13 @@ class MemoriesCollectionViewController: UICollectionViewController {
         self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
 
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        checkForGrantedPermission()
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -58,6 +68,21 @@ class MemoriesCollectionViewController: UICollectionViewController {
         // Configure the cell
     
         return cell
+    }
+    
+    func checkForGrantedPermission(){
+        
+        let photoAuth : Bool = PHPhotoLibrary.authorizationStatus() == .authorized
+        let recordingAuth : Bool = AVAudioSession.sharedInstance().recordPermission() == .granted
+        let transcriptionAuth : Bool = SFSpeechRecognizer.authorizationStatus() == .authorized
+        
+        let authorized = photoAuth && recordingAuth && transcriptionAuth
+        
+        if !authorized {
+            if let vc = storyboard?.instantiateViewController(withIdentifier: "RequestPermission"){
+                navigationController?.present(vc, animated: true, completion: nil)
+            }
+        }
     }
 
     // MARK: UICollectionViewDelegate
