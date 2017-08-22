@@ -14,9 +14,12 @@ import Speech
 private let reuseIdentifier = "collectionCell"
 
 class MemoriesCollectionViewController: UICollectionViewController {
+    
+    var memories : [URL] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.loadMemories()
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -39,6 +42,51 @@ class MemoriesCollectionViewController: UICollectionViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    
+    func checkForGrantedPermission(){
+        
+        let photoAuth : Bool = PHPhotoLibrary.authorizationStatus() == .authorized
+        let recordingAuth : Bool = AVAudioSession.sharedInstance().recordPermission() == .granted
+        let transcriptionAuth : Bool = SFSpeechRecognizer.authorizationStatus() == .authorized
+        
+        let authorized = photoAuth && recordingAuth && transcriptionAuth
+        
+        if !authorized {
+            if let vc = storyboard?.instantiateViewController(withIdentifier: "RequestPermission"){
+                navigationController?.present(vc, animated: true, completion: nil)
+            }
+        }
+    }
+
+    func loadMemories(){
+        self.memories.removeAll()
+        
+        guard let files = try? FileManager.default.contentsOfDirectory(at: getDocumentsDirectory(), includingPropertiesForKeys: nil, options: []) else {
+            return
+        }
+        
+        for file in files {
+            
+            let fileName = file.lastPathComponent
+            
+            if fileName.hasSuffix(".thumb"){
+                let noExtension = fileName.replacingOccurrences(of: ".thumb", with: "")
+                let memoryPath = getDocumentsDirectory().appendingPathComponent(noExtension)
+                memories.append(memoryPath)
+            }
+        }
+        collectionView?.reloadSections(IndexSet(integer: 1))
+    }
+    
+    func getDocumentsDirectory() -> URL{
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        var documentsDirectory : URL = URL(string : "")!
+        if paths.count > 0 {
+         documentsDirectory = paths[0]
+        }
+        return documentsDirectory
+    }
+    
     /*
     // MARK: - Navigation
 
@@ -70,21 +118,6 @@ class MemoriesCollectionViewController: UICollectionViewController {
         return cell
     }
     
-    func checkForGrantedPermission(){
-        
-        let photoAuth : Bool = PHPhotoLibrary.authorizationStatus() == .authorized
-        let recordingAuth : Bool = AVAudioSession.sharedInstance().recordPermission() == .granted
-        let transcriptionAuth : Bool = SFSpeechRecognizer.authorizationStatus() == .authorized
-        
-        let authorized = photoAuth && recordingAuth && transcriptionAuth
-        
-        if !authorized {
-            if let vc = storyboard?.instantiateViewController(withIdentifier: "RequestPermission"){
-                navigationController?.present(vc, animated: true, completion: nil)
-            }
-        }
-    }
-
     // MARK: UICollectionViewDelegate
 
     /*
