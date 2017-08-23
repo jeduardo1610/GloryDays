@@ -161,6 +161,22 @@ class MemoriesCollectionViewController: UICollectionViewController,
         return memory.appendingPathExtension("txt")
     }
     
+    func showDialog(title: String?, message : String?){
+        
+        if let title = title, let message = message {
+            let alertController : UIAlertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            
+            let okAction : UIAlertAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            
+            alertController.addAction(okAction)
+            
+            self.present(alertController, animated: true, completion: nil)
+        } else {
+            showDialog(title: "Glory Days", message: "Something went terribly wrong")
+        }
+        
+    }
+    
     //MARK: - UIImagePickerControllerDelegate
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
@@ -361,6 +377,7 @@ class MemoriesCollectionViewController: UICollectionViewController,
             if fileManager.fileExists(atPath: transctiptionName.path){
                 let contents = try String(contentsOf: transctiptionName)
                 print(contents)
+                showDialog(title: "Glory Days", message: contents)
             }
             
         } catch let error {
