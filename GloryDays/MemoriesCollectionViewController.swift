@@ -18,6 +18,7 @@ class MemoriesCollectionViewController: UICollectionViewController,
                                         UINavigationControllerDelegate {
     
     var memories : [URL] = []
+    var currentMemory : URL!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -198,7 +199,18 @@ class MemoriesCollectionViewController: UICollectionViewController,
         cell.imageView.image = image
     
         // Configure the cell
-    
+        
+        //verifying if cell has gesture recognizer
+        if cell.gestureRecognizers == nil {
+            let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.cellLongPress))
+            recognizer.minimumPressDuration = 0.3
+            cell.addGestureRecognizer(recognizer)
+            
+            cell.layer.borderColor = UIColor.white.cgColor
+            cell.layer.borderWidth = 4
+            cell.layer.cornerRadius = 10
+        }
+        
         return cell
     }
     
@@ -216,6 +228,36 @@ class MemoriesCollectionViewController: UICollectionViewController,
         }
     }
     
+    func cellLongPress(sender: UILongPressGestureRecognizer){
+
+        switch sender.state {
+        case .began:
+            let cell = sender.view as! MemoryCell
+            if let index = collectionView?.indexPath(for: cell) {
+                self.currentMemory = self.memories[index.row]
+                self.startRecording()
+            }
+            
+        case .ended:
+            self.stopRecording(success: true)
+            
+        default:
+            break;
+        }
+        
+    }
+    
+    func startRecording(){
+        print("Start recording")
+    }
+    
+    func stopRecording(success : Bool){
+        print("Stop recording")
+    }
+    
+    func transcribeAudioToText(audio : URL){
+        
+    }
     
     // MARK: UICollectionViewDelegate
 
