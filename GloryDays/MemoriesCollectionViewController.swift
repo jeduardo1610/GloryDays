@@ -15,13 +15,19 @@ private let reuseIdentifier = "collectionCell"
 
 class MemoriesCollectionViewController: UICollectionViewController,
                                         UIImagePickerControllerDelegate,
-                                        UINavigationControllerDelegate {
+                                        UINavigationControllerDelegate,
+                                        AVAudioRecorderDelegate{
     
     var memories : [URL] = []
     var currentMemory : URL!
+    var audioRecorder : AVAudioRecorder?
+    var recordingURL : URL!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.recordingURL = try? getDocumentsDirectory().appendingPathComponent("memory-recording.m4a")
+        
         self.loadMemories()
         
         //adding a new right button into navigation bar
@@ -230,15 +236,18 @@ class MemoriesCollectionViewController: UICollectionViewController,
     
     func cellLongPress(sender: UILongPressGestureRecognizer){
 
+        let cell = sender.view as! MemoryCell
+        
         switch sender.state {
         case .began:
-            let cell = sender.view as! MemoryCell
             if let index = collectionView?.indexPath(for: cell) {
                 self.currentMemory = self.memories[index.row]
+                cell.layer.borderColor = UIColor.red.cgColor
                 self.startRecording()
             }
             
         case .ended:
+            cell.layer.borderColor = UIColor.white.cgColor
             self.stopRecording(success: true)
             
         default:
@@ -248,17 +257,84 @@ class MemoriesCollectionViewController: UICollectionViewController,
     }
     
     func startRecording(){
-        print("Start recording")
+        let recordingSession = AVAudioSession.sharedInstance()
+        do {
+            
+            try recordingSession.setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
+            try recordingSession.setActive(true)
+            
+            let recordingSettings = [AVFormatIDKey : Int(kAudioFormatMPEG4AAC),
+                                     AVSampleRateKey : 44100,
+                                     AVNumberOfChannelsKey : 2,
+                                     AVEncoderAudioQualityKey : AVAudioQuality.high.rawValue]
+            
+            audioRecorder = try AVAudioRecorder(url: recordingURL, settings: recordingSettings)
+            audioRecorder?.delegate = self
+            audioRecorder?.record()
+            
+        } catch let error {
+            print("Something went wrong while recording \n \(error.localizedDescription)")
+            stopRecording(success: false)
+        }
     }
     
     func stopRecording(success : Bool){
-        print("Stop recording")
+        audioRecorder?.stop()
+        
+        if success {
+            
+            do {
+               let memoryAudioUrl = self.currentMemory.appendingPathExtension("m4a")
+                let fileManager = FileManager.default
+                
+                if fileManager.fileExists(atPath: memoryAudioUrl.path){
+                 try fileManager.removeItem(at: memoryAudioUrl)
+                }
+                
+                try fileManager.moveItem(at: recordingURL, to: memoryAudioUrl)
+                self.transcribeAudioToText(memory: self.currentMemory)
+                
+            } catch let error {
+                print("Something went wrong while recording \n \(error.localizedDescription)")
+            }
+            
+        } else {
+            print("Something went wrong while recording")
+        }
     }
     
-    func transcribeAudioToText(audio : URL){
+    func transcribeAudioToText(memory : URL){
+        let audio = audioUrl(for: memory)
+        let transcription = transcriptionUrl(for: memory)
+        
+        let recognizer = SFSpeechRecognizer()
+        
+        let request = SFSpeechURLRecognitionRequest(url: audio)
+        recognizer?.recognitionTask(with: request, resultHandler: {[unowned self] (result, error) in
+            
+            guard let result = result else {
+                print("Something went wrong \n \(error.localizedDescription)")
+                return
+            }
+            if result.isFinal {
+                let text = result.bestTranscription.formattedString
+                
+                do {
+                    try text.write(to: transcription, atomically: true, encoding: String.Encoding.utf8)
+                }catch let error {
+                    print("Something went wrong while transcripting \n \(error.localizedDescription)")
+                }
+            }
+            
+        })
         
     }
     
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        if !flag {
+            self.stopRecording(success: false)
+        }
+    }
     // MARK: UICollectionViewDelegate
 
     /*
