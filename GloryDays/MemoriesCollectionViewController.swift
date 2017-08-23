@@ -11,15 +11,20 @@ import AVFoundation
 import Photos
 import Speech
 
-private let reuseIdentifier = "collectionCell"
+private let reuseIdentifier = "Cell"
 
-class MemoriesCollectionViewController: UICollectionViewController {
+class MemoriesCollectionViewController: UICollectionViewController,
+                                        UIImagePickerControllerDelegate,
+                                        UINavigationControllerDelegate {
     
     var memories : [URL] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.loadMemories()
+        
+        //adding a new right button into navigation bar
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(self.addButtonPressed))
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -75,16 +80,70 @@ class MemoriesCollectionViewController: UICollectionViewController {
                 memories.append(memoryPath)
             }
         }
-        collectionView?.reloadSections(IndexSet(integer: 1))
+        print((collectionView?.numberOfSections)!)
+        if (collectionView?.numberOfSections)! > 0 {
+            collectionView?.reloadSections(IndexSet(integer: 1))
+        }
     }
     
     func getDocumentsDirectory() -> URL{
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        var documentsDirectory : URL = URL(string : "")!
-        if paths.count > 0 {
-         documentsDirectory = paths[0]
-        }
+        let documentsDirectory = paths[0]
         return documentsDirectory
+    }
+    
+    func addButtonPressed(){
+        let vc = UIImagePickerController()
+        vc.modalPresentationStyle = .formSheet
+        vc.delegate = self
+        navigationController?.present(vc, animated: true, completion: nil)
+    }
+    
+    func addNewMemory(image : UIImage){
+        let memoryName = "memory-\(Date().timeIntervalSince1970)"
+        
+        let imageName = "\(memoryName).jpg"
+        let thumbName = "\(memoryName).thumb"
+        
+        do {
+            let imagePath = try self.getDocumentsDirectory().appendingPathComponent(imageName)
+            
+            if let jpegData = UIImageJPEGRepresentation(image, 80.0) {
+                try jpegData.write(to: imagePath, options: [.atomicWrite])
+            }
+            
+            if let thumbnail = resizeImage(image: image, toWidth: 200.0){
+                let thumbPath = try self.getDocumentsDirectory().appendingPathComponent(thumbName)
+                
+                if let thumbData = UIImageJPEGRepresentation(thumbnail, 80.0){
+                    try thumbData.write(to: thumbPath, options: [.atomicWrite])
+                }
+                
+            }
+            
+        }catch{
+            print("Something went terribly wrong while storing the images")
+        }
+    }
+    
+    func resizeImage(image: UIImage, toWidth : CGFloat) -> UIImage?{
+        let scaleFactor = toWidth / image.size.width
+        let newHeight = image.size.height * scaleFactor
+        
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: toWidth, height : newHeight), false, 0)
+        image.draw(in: CGRect(x: 0, y: 0, width: toWidth, height: newHeight))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
+    }
+    //MARK: - UIImagePickerControllerDelegate
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let theImage = info[UIImagePickerControllerOriginalImage] as? UIImage{
+            self.addNewMemory(image: theImage)
+            self.loadMemories()
+        }
     }
     
     /*
