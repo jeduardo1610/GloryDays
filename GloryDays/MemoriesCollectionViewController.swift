@@ -21,12 +21,13 @@ class MemoriesCollectionViewController: UICollectionViewController,
     var memories : [URL] = []
     var currentMemory : URL!
     var audioRecorder : AVAudioRecorder?
+    var audioPlayer : AVAudioPlayer?
     var recordingURL : URL!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.recordingURL = try? getDocumentsDirectory().appendingPathComponent("memory-recording.m4a")
+        self.recordingURL = getDocumentsDirectory().appendingPathComponent("memory-recording.m4a")
         
         self.loadMemories()
         
@@ -257,6 +258,11 @@ class MemoriesCollectionViewController: UICollectionViewController,
     }
     
     func startRecording(){
+        
+        if audioPlayer != nil && (audioPlayer?.isPlaying)! {
+            audioPlayer?.stop()
+        }
+        
         let recordingSession = AVAudioSession.sharedInstance()
         do {
             
@@ -313,7 +319,7 @@ class MemoriesCollectionViewController: UICollectionViewController,
         recognizer?.recognitionTask(with: request, resultHandler: {[unowned self] (result, error) in
             
             guard let result = result else {
-                print("Something went wrong \n \(error.localizedDescription)")
+                print("Something went wrong \n \(error?.localizedDescription ?? "No error description found")")
                 return
             }
             if result.isFinal {
@@ -337,6 +343,33 @@ class MemoriesCollectionViewController: UICollectionViewController,
     }
     // MARK: UICollectionViewDelegate
 
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let memory = self.memories[indexPath.row]
+        
+        let fileManager = FileManager.default
+        
+        do {
+            let audioName = audioUrl(for: memory)
+            let transctiptionName = transcriptionUrl(for: memory)
+            
+            if fileManager.fileExists(atPath: audioName.path){
+                self.audioPlayer = try AVAudioPlayer(contentsOf: audioName)
+                self.audioPlayer?.play()
+            }
+            
+            if fileManager.fileExists(atPath: transctiptionName.path){
+                let contents = try String(contentsOf: transctiptionName)
+                print(contents)
+            }
+            
+        } catch let error {
+            print("Something went wrong while fetching the audio file \n \(error.localizedDescription)")
+
+        }
+        
+    }
+    
     /*
     // Uncomment this method to specify if the specified item should be highlighted during tracking
     override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
