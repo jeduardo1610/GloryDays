@@ -11,7 +11,7 @@ import AVFoundation
 import Photos
 import Speech
 
-private let reuseIdentifier = "Cell"
+private let reuseIdentifier = "collectionCell"
 
 class MemoriesCollectionViewController: UICollectionViewController,
                                         UIImagePickerControllerDelegate,
@@ -30,7 +30,7 @@ class MemoriesCollectionViewController: UICollectionViewController,
         // self.clearsSelectionOnViewWillAppear = false
 
         // Register cell classes
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        //self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier) //to register the king of cell that we will use
 
         // Do any additional setup after loading the view.
     }
@@ -80,7 +80,6 @@ class MemoriesCollectionViewController: UICollectionViewController,
                 memories.append(memoryPath)
             }
         }
-        print((collectionView?.numberOfSections)!)
         if (collectionView?.numberOfSections)! > 0 {
             collectionView?.reloadSections(IndexSet(integer: 1))
         }
@@ -106,14 +105,14 @@ class MemoriesCollectionViewController: UICollectionViewController,
         let thumbName = "\(memoryName).thumb"
         
         do {
-            let imagePath = try self.getDocumentsDirectory().appendingPathComponent(imageName)
+            let imagePath =  self.getDocumentsDirectory().appendingPathComponent(imageName)
             
             if let jpegData = UIImageJPEGRepresentation(image, 80.0) {
                 try jpegData.write(to: imagePath, options: [.atomicWrite])
             }
             
             if let thumbnail = resizeImage(image: image, toWidth: 200.0){
-                let thumbPath = try self.getDocumentsDirectory().appendingPathComponent(thumbName)
+                let thumbPath = self.getDocumentsDirectory().appendingPathComponent(thumbName)
                 
                 if let thumbData = UIImageJPEGRepresentation(thumbnail, 80.0){
                     try thumbData.write(to: thumbPath, options: [.atomicWrite])
@@ -137,6 +136,23 @@ class MemoriesCollectionViewController: UICollectionViewController,
         
         return newImage
     }
+    
+    func imageUrl (for memory: URL) -> URL {
+        return memory.appendingPathExtension("jpg")
+    }
+    
+    func thumbnailUrl (for memory: URL) -> URL {
+        return memory.appendingPathExtension("thumb")
+    }
+    
+    func audioUrl (for memory: URL) -> URL {
+        return memory.appendingPathExtension("m4a")
+    }
+    
+    func transcriptionUrl (for memory: URL) -> URL {
+        return memory.appendingPathExtension("txt")
+    }
+    
     //MARK: - UIImagePickerControllerDelegate
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
@@ -160,22 +176,46 @@ class MemoriesCollectionViewController: UICollectionViewController,
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 2
     }
 
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return 0
+        if section == 0 {
+            return 0
+        } else {
+            return self.memories.count
+        }
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! MemoryCell
+        
+        let memory = self.memories[indexPath.row]
+        let memoryName = self.thumbnailUrl(for: memory).path
+        let image = UIImage(contentsOfFile: memoryName)
+        cell.imageView.image = image
     
         // Configure the cell
     
         return cell
     }
+    
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "collectionHeader", for: indexPath)
+        
+        return header
+    }
+    
+     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        if section == 0{
+            return CGSize(width: 0, height: 50)
+        }else {
+            return CGSize.zero
+        }
+    }
+    
     
     // MARK: UICollectionViewDelegate
 
