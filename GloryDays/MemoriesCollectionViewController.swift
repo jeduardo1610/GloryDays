@@ -11,6 +11,9 @@ import AVFoundation
 import Photos
 import Speech
 
+import CoreSpotlight
+import MobileCoreServices
+
 private let reuseIdentifier = "collectionCell"
 
 class MemoriesCollectionViewController: UICollectionViewController,
@@ -343,6 +346,7 @@ class MemoriesCollectionViewController: UICollectionViewController,
                 
                 do {
                     try text.write(to: transcription, atomically: true, encoding: String.Encoding.utf8)
+                    self.indexMemory(memory: memory, text: text)
                 }catch let error {
                     print("Something went wrong while transcripting \n \(error.localizedDescription)")
                 }
@@ -357,6 +361,26 @@ class MemoriesCollectionViewController: UICollectionViewController,
             self.stopRecording(success: false)
         }
     }
+    
+    func indexMemory(memory: URL, text: String) {
+        let attributeSet = CSSearchableItemAttributeSet(itemContentType: kUTTypeText as String)
+        attributeSet.title = "Glory Days Memory"
+        attributeSet.contentDescription = text
+        attributeSet.thumbnailURL = thumbnailUrl(for: memory)
+        
+        let item = CSSearchableItem(uniqueIdentifier: memory.path, domainIdentifier: "com.jepb", attributeSet: attributeSet)
+        
+        item.expirationDate = Date.distantFuture
+        
+        CSSearchableIndex.default().indexSearchableItems([item]) { (error) in
+            if let error = error {
+              print("Something went wrong while indexing text with Spotlight \n \(error.localizedDescription)")
+            } else {
+                 print("Text indexed successfully with Spotlight:\n \(text)")
+            }
+        }
+    }
+    
     // MARK: UICollectionViewDelegate
 
     
