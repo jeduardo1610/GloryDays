@@ -19,13 +19,16 @@ private let reuseIdentifier = "collectionCell"
 class MemoriesCollectionViewController: UICollectionViewController,
                                         UIImagePickerControllerDelegate,
                                         UINavigationControllerDelegate,
-                                        AVAudioRecorderDelegate{
+                                        AVAudioRecorderDelegate,
+                                        UISearchBarDelegate{
     
     var memories : [URL] = []
+    var filteredMemories : [URL] = []
     var currentMemory : URL!
     var audioRecorder : AVAudioRecorder?
     var audioPlayer : AVAudioPlayer?
     var recordingURL : URL!
+    var searchQuery : CSSearchQuery!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,7 +44,7 @@ class MemoriesCollectionViewController: UICollectionViewController,
         // self.clearsSelectionOnViewWillAppear = false
 
         // Register cell classes
-        //self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier) //to register the king of cell that we will use
+        //self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier) //to register the kind of cell that we will use
 
         // Do any additional setup after loading the view.
     }
@@ -91,6 +94,9 @@ class MemoriesCollectionViewController: UICollectionViewController,
                 memories.append(memoryPath)
             }
         }
+        
+        filteredMemories = memories
+        
         if (collectionView?.numberOfSections)! > 0 {
             collectionView?.reloadSections(IndexSet(integer: 1))
         }
@@ -212,14 +218,14 @@ class MemoriesCollectionViewController: UICollectionViewController,
         if section == 0 {
             return 0
         } else {
-            return self.memories.count
+            return self.filteredMemories.count
         }
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! MemoryCell
         
-        let memory = self.memories[indexPath.row]
+        let memory = self.filteredMemories[indexPath.row]
         let memoryName = self.thumbnailUrl(for: memory).path
         let image = UIImage(contentsOfFile: memoryName)
         cell.imageView.image = image
@@ -261,7 +267,7 @@ class MemoriesCollectionViewController: UICollectionViewController,
         switch sender.state {
         case .began:
             if let index = collectionView?.indexPath(for: cell) {
-                self.currentMemory = self.memories[index.row]
+                self.currentMemory = self.filteredMemories[index.row]
                 cell.layer.borderColor = UIColor.red.cgColor
                 self.startRecording()
             }
@@ -346,9 +352,11 @@ class MemoriesCollectionViewController: UICollectionViewController,
                 
                 do {
                     try text.write(to: transcription, atomically: true, encoding: String.Encoding.utf8)
+                    self.showDialog(title: "Glory Days", message: "Finish transcription your record")
                     self.indexMemory(memory: memory, text: text)
                 }catch let error {
                     print("Something went wrong while transcripting \n \(error.localizedDescription)")
+                    self.showDialog(title: "Glory Days", message: "Something went wrong while transcripting \n \(error.localizedDescription)")
                 }
             }
             
@@ -381,11 +389,55 @@ class MemoriesCollectionViewController: UICollectionViewController,
         }
     }
     
+    func filterMemories(text: String){
+        
+        guard text.characters.count > 0 else {
+            self.filteredMemories = self.memories
+            
+            UIView.performWithoutAnimation {
+                collectionView?.reloadSections(IndexSet(integer: 1))
+            }
+            return
+        }
+        
+        var allTheItems: [CSSearchableItem] = []
+        
+        if searchQuery != nil && !searchQuery.isCancelled {
+            searchQuery.cancel()
+        }
+        
+        let queryString = "contentDescription == \"*\(text)*\"c"
+        self.searchQuery = CSSearchQuery(queryString: queryString, attributes: nil)
+        self.searchQuery.foundItemsHandler = { items in
+            allTheItems.append(contentsOf: items)
+        }
+        
+        self.searchQuery.completionHandler = { error in
+            DispatchQueue.main.async { [unowned self] in
+                self.activateFiler(matches: allTheItems)
+                
+            }
+        }
+        self.searchQuery.start()
+    }
+    
+    func activateFiler(matches: [CSSearchableItem]){
+        
+        self.filteredMemories = matches.map{ item in
+            let uniqueID = item.uniqueIdentifier
+            let url = URL(fileURLWithPath: uniqueID)
+            return url
+        }
+        UIView.performWithoutAnimation {
+            collectionView?.reloadSections(IndexSet(integer: 1))
+        }
+    }
+    
     // MARK: UICollectionViewDelegate
 
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let memory = self.memories[indexPath.row]
+        let memory = self.filteredMemories[indexPath.row]
         
         let fileManager = FileManager.default
         
@@ -439,5 +491,16 @@ class MemoriesCollectionViewController: UICollectionViewController,
     
     }
     */
+    
+    
+    // MARK: SearchBarDelegate
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.filterMemories(text: searchText)
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder() // hide keyboard
+    }
 
 }
